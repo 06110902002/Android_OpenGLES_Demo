@@ -48,21 +48,21 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
         //桌子长方形使用三角形表示
         float[] tableVerticesWithTriangles = {
                 //Triangle 1
-                0f,0f,
-                9f,14f,
-                0f,14f,
+                -0.5f,-0.5f,
+                0.5f,0.5f,
+                -0.5f,0.5f,
                 //Triangle 2
-                0f,0f,
-                9f,0f,
-                9f,14f,
+                -0.5f,-0.5f,
+                0.5f,-0.5f,
+                0.5f,0.5f,
 
                 // 一条线的4个坐标
-                0f,7f,
-                9f,7f,
+                -0.5f,0f,
+                0.5f,0f,
 
                 //两个木锤 的坐标
-                4.5f,2f,
-                4.5f,12f
+                0f,-0.25f,
+                0f,0.25f
 
         };
 
@@ -139,15 +139,15 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
 
         //绘制 分隔线
-        GLES20.glUniform4f(uColorLocation,1.0f,1.0f,1.0f,1.0f);
+        GLES20.glUniform4f(uColorLocation,1.0f,0.0f,0.0f,1.0f);
         GLES20.glDrawArrays(GLES20.GL_LINES,6,2);
 
         //绘制木锤 1
-        GLES20.glUniform4f(uColorLocation,1.0f,1.0f,1.0f,1.0f);
+        GLES20.glUniform4f(uColorLocation,0.0f,0.0f,1.0f,1.0f);
         GLES20.glDrawArrays(GLES20.GL_POINTS,8,1);
 
         //绘制木锤  2
-        GLES20.glUniform4f(uColorLocation,1.0f,1.0f,1.0f,1.0f);
+        GLES20.glUniform4f(uColorLocation,1.0f,0.0f,0.0f,1.0f);
         GLES20.glDrawArrays(GLES20.GL_POINTS,9,1);
 
 
