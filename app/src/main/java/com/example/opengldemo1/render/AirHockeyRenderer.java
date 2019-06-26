@@ -152,4 +152,7 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
 
     }
+    //第一阶段完成：实现OpenGL 绘制的基本流程（1.初始化GLSurfaceView2.添加渲染器3、加载shaderr并编译shader）
+
+
 }
