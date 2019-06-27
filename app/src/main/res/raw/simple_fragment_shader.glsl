@@ -1,8 +1,8 @@
 precision mediump float;
 
-uniform vec4 u_Color;
+varying vec4 v_Color;   //接收顶点的混合颜色，之后再传给片段着色器
 
 void main(){
 
-    gl_FragColor = u_Color;
+    gl_FragColor = v_Color;
 }

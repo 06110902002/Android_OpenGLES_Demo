@@ -20,6 +20,8 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     private Context context;
     private static final int POSITION_COMPONET_COUNT = 2;
 
+
+
     //为了方便在native 层读取java层的数据（即Dalvik层的数据）
     //需要将变量进行一次转换
     private static final int BYTES_PER_FLOAT = 4; //java float 有32位精度所以此处定义为4
@@ -29,6 +31,15 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     //片段着色器颜色
     private static final String U_COLOR = "u_Color";
     private int uColorLocation;
+
+    private static final String A_COLOR = "a_Color";
+    private static final int COLOR_COMPOENT_COUNT = 3;//每个颜色为3维，即R, G, B,在下面的的数组中需要取3个数据;
+
+    //跨距，告诉OpenGL 每个位置之前有多少个字节，即顶点+颜色
+    private static final int STRIDE = (POSITION_COMPONET_COUNT + COLOR_COMPOENT_COUNT) * BYTES_PER_FLOAT;
+
+    private int aColorLocation;
+
 
     //获取属性的位置
     private static final String A_POSITION = "a_Position";
@@ -47,22 +58,23 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
         //桌子长方形使用三角形表示
         float[] tableVerticesWithTriangles = {
+                // Order of coordinates X, Y,R,G,B
+
                 //Triangle 1
-                -0.5f,-0.5f,
-                0.5f,0.5f,
-                -0.5f,0.5f,
-                //Triangle 2
-                -0.5f,-0.5f,
-                0.5f,-0.5f,
-                0.5f,0.5f,
+                0f,        0f,      1f,     1f,   1f,
+                -0.5f,  -0.5f,      0.7f, 0.7f, 0.7f,
+                0.5f,   -0.5f,      0.7f, 0.7f, 0.7f,
+                0.5f,    0.5f,      0.7f, 0.7f, 0.7f,
+                -0.5f,   0.5f,      0.7f, 0.7f, 0.7f,
+                -0.5f,  -0.5f,      0.7f, 0.7f, 0.7f,
 
                 // 一条线的4个坐标
-                -0.5f,0f,
+                -0.5f,0f,           1f,     0f,   0f,
                 0.5f,0f,
 
                 //两个木锤 的坐标
-                0f,-0.25f,
-                0f,0.25f
+                0f,-0.25f,          0f,     0f,   1f,
+                0f,0.25f,           1f,     0f,   0f
 
         };
 
@@ -102,19 +114,26 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
 
         //获取unifrom 的位置,有了这个位置之后，就能告诉OpenGL 至哪里去找这个属性对应的数据了
-        uColorLocation = GLES20.glGetUniformLocation(program,U_COLOR);
-        aPositionLocation = GLES20.glGetAttribLocation(program,A_POSITION);
+        aColorLocation = GLES20.glGetAttribLocation(program, A_COLOR);
+        aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION);
 
         //下一步告诉OpenGl 到哪里找到 a_Position对应的数据,
-        //找到之后，将顶点数据与属性关联起来
+        //找到之后，将顶点数据与属性关联起来,从颜色处开始读取
         vertexData.position(0);
 
         //此处有告诉每个顶点包含多少个分量 ，分量值由POSITION_COMPONET_COUNT指定
-        GLES20.glVertexAttribPointer(aPositionLocation,POSITION_COMPONET_COUNT,GLES20.GL_FLOAT,false,0,vertexData);
+        GLES20.glVertexAttribPointer(aPositionLocation,POSITION_COMPONET_COUNT,GLES20.GL_FLOAT,false,STRIDE,vertexData);
+
+        GLES20.glEnableVertexAttribArray(aPositionLocation);
+
+        //移到下一个颜色起始点
+        vertexData.position(POSITION_COMPONET_COUNT);
+        //颜色分量
+        GLES20.glVertexAttribPointer(aColorLocation,COLOR_COMPOENT_COUNT,GLES20.GL_FLOAT,false,STRIDE,vertexData);
 
 
         //开启顶点数据
-        GLES20.glEnableVertexAttribArray(aPositionLocation);
+        GLES20.glEnableVertexAttribArray(aColorLocation);
 
 
     }
@@ -132,22 +151,22 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
 
         //更新着色器中u_Color 值，注意颜色值为4个分量即，r,g,b,a
-        GLES20.glUniform4f(uColorLocation,1.0f,1.0f,1.0f,1.0f);
+        //GLES20.glUniform4f(uColorLocation,1.0f,1.0f,1.0f,1.0f);
 
-        //画三角形，从数据数组开头读取6个顶点，代表画2个三角形
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES,0,6);
+        //使用三角形扇画三角形，从数据数组开头读取6个顶点，代表画2个三角形
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN,0,6);
 
 
         //绘制 分隔线
-        GLES20.glUniform4f(uColorLocation,1.0f,0.0f,0.0f,1.0f);
+        //GLES20.glUniform4f(uColorLocation,1.0f,0.0f,0.0f,1.0f);
         GLES20.glDrawArrays(GLES20.GL_LINES,6,2);
 
         //绘制木锤 1
-        GLES20.glUniform4f(uColorLocation,0.0f,0.0f,1.0f,1.0f);
+        //GLES20.glUniform4f(uColorLocation,0.0f,0.0f,1.0f,1.0f);
         GLES20.glDrawArrays(GLES20.GL_POINTS,8,1);
 
         //绘制木锤  2
-        GLES20.glUniform4f(uColorLocation,1.0f,0.0f,0.0f,1.0f);
+        //GLES20.glUniform4f(uColorLocation,1.0f,0.0f,0.0f,1.0f);
         GLES20.glDrawArrays(GLES20.GL_POINTS,9,1);
 
 
