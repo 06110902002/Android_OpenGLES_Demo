@@ -3,6 +3,7 @@ package com.example.opengldemo1.render;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 
 import com.example.opengldemo1.R;
 import com.example.opengldemo1.utils.ShaderHepler;
@@ -44,6 +45,14 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     //获取属性的位置
     private static final String A_POSITION = "a_Position";
     private int aPositionLocation;
+
+    private static final String U_MATRIX = "u_Matrix"; //读取shader中矩阵值
+    private final float[] projectionMatrix = new float[16];
+    //保存矩阵的uniform值
+    private int uMatrixLocation;
+
+
+    float aspectRation;
 
     public AirHockeyRenderer(Context context){
         this.context = context;
@@ -95,7 +104,6 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
         //1.读取着色器代码
         String vertexShaderSource = TextResourceReader.readTextFileFromResource(this.context, R.raw.simple_vertex_shader);
         String fragmentShaderSource = TextResourceReader.readTextFileFromResource(this.context, R.raw.simple_fragment_shader);
-        System.out.println("82----------------："+vertexShaderSource);
         //2.编译着色器代码
         int vertexShader = ShaderHepler.compileVertexShader(vertexShaderSource);
         int fragmentShader = ShaderHepler.compileFragmentShader(fragmentShaderSource);
@@ -116,6 +124,9 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
         //获取unifrom 的位置,有了这个位置之后，就能告诉OpenGL 至哪里去找这个属性对应的数据了
         aColorLocation = GLES20.glGetAttribLocation(program, A_COLOR);
         aPositionLocation = GLES20.glGetAttribLocation(program, A_POSITION);
+
+        //获取矩阵的uniform值
+        uMatrixLocation = GLES20.glGetUniformLocation(program,U_MATRIX);
 
         //下一步告诉OpenGl 到哪里找到 a_Position对应的数据,
         //找到之后，将顶点数据与属性关联起来,从颜色处开始读取
@@ -140,8 +151,30 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
 
     @Override
-    public void onSurfaceChanged(GL10 gl10, int i, int i1) {
-        GLES20.glViewport(0,0,i,i1);
+    public void onSurfaceChanged(GL10 gl10, int width, int height) {
+        GLES20.glViewport(0,0,width,height);
+
+        //创建一个正交投影
+        aspectRation = width > height ? (float) width / (float) height :
+                (float) height / (float) width ;
+
+        if(width > height){
+            //横屏模式
+            Matrix.orthoM(projectionMatrix,0,-aspectRation,aspectRation,-1f,1f,-1f,1f);
+        }else{
+            Matrix.orthoM(projectionMatrix,0,-1f,1f,-aspectRation,aspectRation,-1f,1f);
+
+        }
+    }
+
+    /**
+     * 更新投影矩阵，来控制页面的位移
+     * @param top
+     * @param bottom
+     */
+    public void updateMatriPos(float top,float bottom){
+
+        Matrix.orthoM(projectionMatrix,0,-1f,1f,-aspectRation + bottom,aspectRation,-1f,1f);
     }
 
     @Override
@@ -149,6 +182,8 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
         //清空 rendering surface
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
+        //传递正交投影矩阵
+        GLES20.glUniformMatrix4fv(uMatrixLocation,1,false,projectionMatrix,0);
 
         //更新着色器中u_Color 值，注意颜色值为4个分量即，r,g,b,a
         //GLES20.glUniform4f(uColorLocation,1.0f,1.0f,1.0f,1.0f);
