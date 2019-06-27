@@ -70,10 +70,10 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
 
                 // 一条线的4个坐标
                 -0.5f,0f,           1f,     0f,   0f,
-                0.5f,0f,
+                0.5f,0f,            0f,     0.23f,0.5f,
 
                 //两个木锤 的坐标
-                0f,-0.25f,          0f,     0f,   1f,
+                0f,-0.25f,          0f,     0.23f,   1f,
                 0f,0.25f,           1f,     0f,   0f
 
         };
