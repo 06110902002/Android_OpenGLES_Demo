@@ -6,6 +6,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 import com.example.opengldemo1.R;
+import com.example.opengldemo1.utils.MatrixHelper;
 import com.example.opengldemo1.utils.ShaderHepler;
 import com.example.opengldemo1.utils.TextResourceReader;
 
@@ -51,8 +52,9 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     //保存矩阵的uniform值
     private int uMatrixLocation;
 
-
     float aspectRation;
+
+    private final float[] modelMatrix = new float[16];
 
     public AirHockeyRenderer(Context context){
         this.context = context;
@@ -154,17 +156,33 @@ public class AirHockeyRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl10, int width, int height) {
         GLES20.glViewport(0,0,width,height);
 
-        //创建一个正交投影
-        aspectRation = width > height ? (float) width / (float) height :
-                (float) height / (float) width ;
+//        //创建一个正交投影
+//        aspectRation = width > height ? (float) width / (float) height :
+//                (float) height / (float) width ;
+//
+//        if(width > height){
+//            //横屏模式
+//            Matrix.orthoM(projectionMatrix,0,-aspectRation,aspectRation,-1f,1f,-1f,1f);
+//        }else{
+//            Matrix.orthoM(projectionMatrix,0,-1f,1f,-aspectRation,aspectRation,-1f,1f);
+//
+//        }
 
-        if(width > height){
-            //横屏模式
-            Matrix.orthoM(projectionMatrix,0,-aspectRation,aspectRation,-1f,1f,-1f,1f);
-        }else{
-            Matrix.orthoM(projectionMatrix,0,-1f,1f,-aspectRation,aspectRation,-1f,1f);
+        //方法二，使用自定义透视投影矩阵
+        MatrixHelper.perspectiveM(projectionMatrix,45,(float)width / (float)height,1f,10f);
 
-        }
+
+        Matrix.setIdentityM(modelMatrix,0);
+        Matrix.translateM(modelMatrix,0,0f,0f,-4.5f);
+
+        Matrix.rotateM(modelMatrix,0,-60f,1f,0f,0f);
+
+        final float[] temp = new float[16];
+        Matrix.multiplyMM(temp,0,projectionMatrix,0,modelMatrix,0);
+        System.arraycopy(temp,0,projectionMatrix,0,temp.length);
+
+        Matrix.translateM(modelMatrix,0,0f,0f,-2.5f);
+        Matrix.rotateM(modelMatrix,0,-60f,1f,0f,0f);
     }
 
     /**
