@@ -133,4 +133,23 @@ public class ShaderHepler {
 
         return validateStatus[0] != 0;
     }
+
+
+    public static int buildProgram(String vertexShaderSource,
+                                   String fragmentShaderSource){
+
+        int progrm;
+        //编译着色器
+        int vertexShader = compileVertexShader(vertexShaderSource);
+        int fragmentShader = compileFragmentShader(fragmentShaderSource);
+
+        //将编译后的着色器链接为一个程序
+        progrm = linkProgram(vertexShader,fragmentShader);
+
+        //验证一下
+        validateProgram(progrm);
+
+        return progrm;
+
+    }
 }

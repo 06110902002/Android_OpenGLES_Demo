@@ -84,13 +84,13 @@ public class AirHockeyActivity extends AppCompatActivity {
             switch(view.getId()){
                 case R.id.btn_left:
                     bottom += 0.1f;
-                    airHockeyRenderer.updateMatriPos(0f,bottom);
+                    //airHockeyRenderer.updateMatriPos(0f,bottom);
                     glSurfaceView.requestRender();
 
                     break;
                 case R.id.btn_right:
                     bottom -= 0.1f;
-                    airHockeyRenderer.updateMatriPos(0f,bottom);
+                    //airHockeyRenderer.updateMatriPos(0f,bottom);
                     glSurfaceView.requestRender();
                     break;
 
